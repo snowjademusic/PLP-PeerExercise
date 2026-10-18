@@ -29,7 +29,17 @@ cd PLP-PeerExercise
 
 ## 5. Build and Run
 
-Inside your WSL environment, follow the instructions for your processor architecture:
+Inside your WSL environment, your assembly code runs as a native Linux binary. Follow the instructions and system call references for your processor architecture:
 
-- **Intel / AMD (`x86_64`)**: [Linux x86_64 Guide & Hello World](../Linux/x86_64)
-- **ARM (`arm64` / `aarch64`)**: [Linux ARM64 Guide & Hello World](../Linux/arm64)
+- **Intel / AMD (`x86_64`)**: [Linux x86_64 Setup & Syscall Reference](../Linux/x86_64/README.md)
+  - Uses `syscall`, `rax = 0` (`sys_read`), `rax = 1` (`sys_write`), `rax = 2` (`sys_open`), `rax = 3` (`sys_close`), `rax = 60` (`sys_exit`).
+- **ARM (`arm64` / `aarch64`)**: [Linux ARM64 Setup & Syscall Reference](../Linux/arm64/README.md)
+  - Uses `svc #0`, `x8 = 63` (`sys_read`), `x8 = 64` (`sys_write`), `x8 = 56` (`sys_openat`), `x8 = 57` (`sys_close`), `x8 = 93` (`sys_exit`).
+
+### Running the Task Program
+
+From inside your WSL terminal:
+
+```bash
+./displayfile example.txt
+```
