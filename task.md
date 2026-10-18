@@ -1,7 +1,7 @@
 # Task: Terminal Color Art Viewer
 
-In this task, you will create an Assembly program that reads a text file containing an letter-based drawing using ANSI Escape Codes.
-The Task will teach you a lot about syscalls
+In this task, you will create an Assembly program that reads a text file containing a letter-based drawing using ANSI Escape Codes.
+The Task will teach you a lot about syscalls, registers and ,akes you think about the stack pointer whenever you call a function.
 
 ---
 
@@ -22,7 +22,7 @@ Your program must:
    - *(Optional / Bonus)* Add your own colors! (e.g. `C` for Cyan, `O` for Orange, `P` for Pink).
 4. **Preserve formatting 1-to-1**:
    - Newlines (`\n` / ASCII `10`) must be output as newlines so lines and rows match the input file.
-   - Any unmapped characters or spaces can be printed as regular spaces/characters or reset to the default terminal color.
+   - Any unmapped characters and spaces should be skipped, so that even normal texts produce a cool image!
 5. **Print the result to the terminal** using ANSI escape codes and exit cleanly.
 
 ---
@@ -35,7 +35,7 @@ The repository includes an example file: [`example.txt`](example.txt) containing
 GRGRGRGR
 RGRGRGRG
 GRGRGRGR
-RGRGRGRGR
+RGRGRGRG
 GRGRGRGR
 RGRGRGRG
 GRGRGRGR
@@ -56,7 +56,7 @@ Your terminal will display a checkered board of green and red square blocks:
 🟩🟥🟩🟥🟩🟥🟩🟥
 🟥🟩🟥🟩🟥🟩🟥🟩
 🟩🟥🟩🟥🟩🟥🟩🟥
-🟥🟩🟥🟩🟥🟩🟥🟩🟥
+🟥🟩🟥🟩🟥🟩🟥🟩
 🟩🟥🟩🟥🟩🟥🟩🟥
 🟥🟩🟥🟩🟥🟩🟥🟩
 🟩🟥🟩🟥🟩🟥🟩🟥
@@ -69,8 +69,9 @@ Your terminal will display a checkered board of green and red square blocks:
 
 ANSI escape sequences control the color and formatting of text in terminal emulators. An escape sequence begins with the ASCII **ESC** character:
 
-- Hex: `0x1B`
+- Hex: `0x1b`
 - Decimal: `27`
+- Octal: `\033`
 
 Followed by `[` and formatting parameters ending in `m`.
 
@@ -86,18 +87,18 @@ For example, Red is `0x1b, "[41m  ", 0x1b, "[0m"`.
 
 | Letter | Color | Foreground Code | Background Code | Recommended Background Block (Escape Sequence) | NASM Byte Definition (`.data`) |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| `R` | **Red** | `\033[31m` | `\033[41m` | `\033[41m  \033[0m` | `db 0x1B, "[41m  ", 0x1B, "[0m"` |
-| `G` | **Green** | `\033[32m` | `\033[42m` | `\033[42m  \033[0m` | `db 0x1B, "[42m  ", 0x1B, "[0m"` |
-| `B` | **Blue** | `\033[34m` | `\033[44m` | `\033[44m  \033[0m` | `db 0x1B, "[44m  ", 0x1B, "[0m"` |
-| `Y` | **Yellow** | `\033[33m` | `\033[43m` | `\033[43m  \033[0m` | `db 0x1B, "[43m  ", 0x1B, "[0m"` |
-| `V` | **Violet / Magenta** | `\033[35m` | `\033[45m` | `\033[45m  \033[0m` | `db 0x1B, "[45m  ", 0x1B, "[0m"` |
-| `W` | **White** | `\033[37m` | `\033[47m` | `\033[47m  \033[0m` | `db 0x1B, "[47m  ", 0x1B, "[0m"` |
-| `0` | **Black** | `\033[30m` | `\033[40m` | `\033[40m  \033[0m` | `db 0x1B, "[40m  ", 0x1B, "[0m"` |
-| *(Reset)* | *Default* | `\033[39m` | `\033[49m` | `\033[0m` | `db 0x1B, "[0m"` |
+| `R` | **Red** | `0x1b[31m` | `0x1b[41m` | `0x1b[41m  0x1b[0m` | `db 0x1B, "[41m  ", 0x1B, "[0m"` |
+| `G` | **Green** | `0x1b[32m` | `0x1b[42m` | `0x1b[42m  0x1b[0m` | `db 0x1B, "[42m  ", 0x1B, "[0m"` |
+| `B` | **Blue** | `0x1b[34m` | `0x1b[44m` | `0x1b[44m  0x1b[0m` | `db 0x1B, "[44m  ", 0x1B, "[0m"` |
+| `Y` | **Yellow** | `0x1b[33m` | `0x1b[43m` | `0x1b[43m  0x1b[0m` | `db 0x1B, "[43m  ", 0x1B, "[0m"` |
+| `V` | **Violet / Magenta** | `0x1b[35m` | `0x1b[45m` | `0x1b[45m  0x1b[0m` | `db 0x1B, "[45m  ", 0x1B, "[0m"` |
+| `W` | **White** | `0x1b[37m` | `0x1b[47m` | `0x1b[47m  0x1b[0m` | `db 0x1B, "[47m  ", 0x1B, "[0m"` |
+| `0` | **Black** | `0x1b[30m` | `0x1b[40m` | `0x1b[40m  0x1b[0m` | `db 0x1B, "[40m  ", 0x1B, "[0m"` |
+| *(Reset)* | *Default* | `0x1b[39m` | `0x1b[49m` | `0x1b[0m` | `db 0x1B, "[0m"` |
 
 ---
 
-## 🛠️ Step-by-Step Implementation Guide
+## Step-by-Step Implementation Guide
 
 1. **Check Command-Line Arguments (`argc`, `argv`):**
    - Ensure the user passed at least one argument.
@@ -122,27 +123,23 @@ For example, Red is `0x1b, "[41m  ", 0x1b, "[0m"`.
 
 5. **Clean Up and Exit:**
    - Call `sys_close` with the file descriptor.
-   - Reset the terminal attributes with `\033[0m` (good practice to avoid leaving the user's terminal colored).
+   - Reset the terminal attributes with `0x1b[0m` (good practice to avoid leaving the user's terminal colored).
    - Call `sys_exit` with return code `0`.
 
 ---
 
-## 📚 System & Architecture Guides
+## System & Architecture Guides
 
 System call numbers, register conventions, and argument passing vary across operating systems and CPU architectures. Check the specific guide for your machine:
 
-- 🐧 **Linux (Intel / AMD x86_64):**
+- **Linux (Intel / AMD x86_64):**
   - [Guide & Syscall Reference](HelloWorld/Linux/x86_64/README.md)
-  - Key syscalls: `sys_read` (`0`), `sys_write` (`1`), `sys_open` (`2`), `sys_close` (`3`), `sys_exit` (`60`).
-- 🐧 **Linux (ARM64 / aarch64):**
+  
+- **Linux (ARM64 / aarch64):**
   - [Guide & Syscall Reference](HelloWorld/Linux/arm64/README.md)
-  - Key syscalls: `sys_openat` (`56`), `sys_close` (`57`), `sys_read` (`63`), `sys_write` (`64`), `sys_exit` (`93`).
-- 🍎 **macOS (Apple Silicon M1/M2/M3/M4 arm64):**
+- **macOS (Apple Silicon M1/M2/M3/M4 arm64):**
   - [Guide & Syscall Reference](HelloWorld/macOS/arm64/README.md)
-  - Key syscalls via `x16`: `exit` (`1`), `read` (`3`), `write` (`4`), `open` (`5`), `close` (`6`).
-- 🍎 **macOS (Intel x86_64):**
+- **macOS (Intel x86_64):**
   - [Guide & Syscall Reference](HelloWorld/macOS/x86_64/README.md)
-  - Key syscalls via `rax` (+ `0x2000000` offset): `exit` (`1`), `read` (`3`), `write` (`4`), `open` (`5`), `close` (`6`).
-- 🪟 **Windows (WSL):**
+- **Windows (WSL):**
   - [Windows Setup Guide](HelloWorld/Windows/README.md)
-  - Uses the Linux x86_64 or Linux ARM64 system calls inside WSL!

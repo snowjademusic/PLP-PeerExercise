@@ -4,7 +4,7 @@ Setup and instructions to build and run "Hello, World!" in x86_64 Assembly on Li
 
 ## Source File
 
-- [`helloworld_Linux_x86_64.asm`](helloworld_Linux_x86_64.asm)
+- [helloworld_Linux_x86_64.asm](helloworld_Linux_x86_64.asm)
 
 ## 1. Install NASM & Binutils
 
@@ -28,12 +28,6 @@ From this directory:
 
 ```bash
 nasm -f elf64 helloworld_Linux_x86_64.asm -o helloworld.o
-ld -s -o helloworld helloworld.o
-./helloworld
-```
-
-```bash
-nasm -f elf64 HelloWorld/Linux/x86_64/helloworld_Linux_x86_64.asm -o helloworld.o
 ld -s -o helloworld helloworld.o
 ./helloworld
 ```

@@ -4,7 +4,7 @@
 global _start
 
 section .data
-    message: db 0x1b,"[41mHello, World!",0x1b, "[0m", 10     ; 10 is the ASCII code for newline ('\n')
+    message: db "Hello, World!", 10     ; 10 is the ASCII code for newline ('\n')
     message_len equ $ - message         ; this calculates current [memory address($)] - [memory address of message]
 
 section .text
